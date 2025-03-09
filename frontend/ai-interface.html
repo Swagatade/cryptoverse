@@ -145,10 +145,9 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            // Remove the index page check to allow direct access
-            // if (!localStorage.getItem("visitedIndex")) {
-            //     window.location.href = 'index.html';
-            // }
+            if (!localStorage.getItem("visitedIndex")) {
+                window.location.href = 'index.html';
+            }
             
             // Initialize wallet functionality
             initWallet();
@@ -200,7 +199,7 @@
 
                 // Simulate AI thinking
                 const thinkingIndicator = document.createElement('div');
-                thinkingIndicator.className = 'ai-message thinking-indicator'; // updated from duplicate class
+                thinkingIndicator.className = 'ai-message thinking-indicator';
                 thinkingIndicator.innerHTML = `
                     <div class="ai-message-avatar">
                         <img src="https://api.dicebear.com/6.x/bottts/svg?seed=crypto" alt="AI">
@@ -218,57 +217,53 @@
                 // Scroll to bottom
                 conversation.scrollTop = conversation.scrollHeight;
 
-                // Remove local setTimeout and use fetch:
-                console.log('====================', message);
-                
-                    fetch('http://localhost:4000/ai', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ prompt: message })
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        // Remove thinking indicator logic
-                        console.log(data);
-                        
-                        conversation.removeChild(thinkingIndicator);
+                // Fetch AI response
+                fetch('http://localhost:4000/ai', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ prompt: message })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    // Remove thinking indicator
+                    conversation.removeChild(thinkingIndicator);
 
-                        const aiMessage = document.createElement('div');
-                        aiMessage.className = 'ai-message ai-response';
-                        aiMessage.innerHTML = `
-                        <div class="ai-message-avatar">
-                            <img src="https://api.dicebear.com/6.x/bottts/svg?seed=crypto" alt="AI">
+                    const aiMessage = document.createElement('div');
+                    aiMessage.className = 'ai-message ai-response';
+                    aiMessage.innerHTML = `
+                    <div class="ai-message-avatar">
+                        <img src="https://api.dicebear.com/6.x/bottts/svg?seed=crypto" alt="AI">
+                    </div>
+                    <div class="ai-message-content">
+                        <p>${data.response}</p>
+                        <div class="ai-message-actions">
+                            <button class="ai-action-btn"><i class="fas fa-thumbs-up"></i></button>
+                            <button class="ai-action-btn"><i class="fas fa-thumbs-down"></i></button>
+                            <button class="ai-action-btn"><i class="fas fa-copy"></i> Copy</button>
                         </div>
-                        <div class="ai-message-content">
-                            <p>${data.response}</p>
-                            <div class="ai-message-actions">
-                                <button class="ai-action-btn"><i class="fas fa-thumbs-up"></i></button>
-                                <button class="ai-action-btn"><i class="fas fa-thumbs-down"></i></button>
-                                <button class="ai-action-btn"><i class="fas fa-copy"></i> Copy</button>
-                            </div>
-                        </div>
-                    `;
-                        conversation.appendChild(aiMessage);
-                        conversation.scrollTop = conversation.scrollHeight;
-                        
-                        // Save the AI response to history
-                        saveResponseToHistory(message, data.response);
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                        conversation.removeChild(thinkingIndicator);
-                        const errorMsg = document.createElement('div');
-                        errorMsg.className = 'ai-message ai-response';
-                        errorMsg.innerHTML = `
-                        <div class="ai-message-avatar">
-                            <img src="https://api.dicebear.com/6.x/bottts/svg?seed=crypto" alt="AI">
-                        </div>
-                        <div class="ai-message-content">
-                            <p>Failed to get response. Please ensure the server is running or try again.</p>
-                        </div>
-                    `;
-                        conversation.appendChild(errorMsg);
-                    });
+                    </div>
+                `;
+                    conversation.appendChild(aiMessage);
+                    conversation.scrollTop = conversation.scrollHeight;
+                    
+                    // Save the AI response to history
+                    saveResponseToHistory(message, data.response);
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    conversation.removeChild(thinkingIndicator);
+                    const errorMsg = document.createElement('div');
+                    errorMsg.className = 'ai-message ai-response';
+                    errorMsg.innerHTML = `
+                    <div class="ai-message-avatar">
+                        <img src="https://api.dicebear.com/6.x/bottts/svg?seed=crypto" alt="AI">
+                    </div>
+                    <div class="ai-message-content">
+                        <p>Failed to get response. Please ensure the server is running or try again.</p>
+                    </div>
+                `;
+                    conversation.appendChild(errorMsg);
+                });
             }
 
             // Functions for persistent chat history
